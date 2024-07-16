@@ -1,7 +1,12 @@
 console.log("loading variables...")
 var warning = false; //set to true if redesgining code that could potentially break game
-const ClientVersion = 1;
-const MinimumServerVersion = 1;
+
+// Game version!!
+const GAMEVERSION = [0,5,0];
+
+// These are for checking server compatibility, only change these if updating information sent/received by the server
+const ClientVersion = 2;
+const MinimumServerVersion = 2;
 
 //draw
 var drawQueue = [];
@@ -39,7 +44,8 @@ var worldText = [];
 var worldParticle = [];
 const melonImg = "https://s2js.com/img/etc/watermelon2.png";
 const playerImg = cliDir + "textures/skins/player.png";
-var PlayerSkin = playerImg;
+var PlayerSkin = playerImg; // change this to based off PlayerSkinName
+var PlayerSkinName = "player";
 
 //misc
 var redActive = 1;
@@ -129,6 +135,17 @@ function getPlayerIdByName(name) {
   }
   return false;
 }
+
+// Checks if your LevelRewards match up with reqs
+function checkReqs(reqs) {
+  for (const req in reqs) {
+    if (!(req in LevelRewards)) return false;
+    if (LevelRewards[req] < reqs[req]) 
+      return false
+  }
+  return true;
+}
+
 
 var preloadList = [
   'block',

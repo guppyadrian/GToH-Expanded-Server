@@ -23,8 +23,8 @@ console.log("");
 
 /* Arbitrary Values */
 const _port = 80;
-const ServerVersion = 1;
-const MinimumClientVersion = 1;
+const ServerVersion = 2;
+const MinimumClientVersion = 2;
 
 var playerList = {}
 
@@ -46,6 +46,7 @@ class OnlinePlayer {
     this.world = -6969;
     this.pos = {x: 0, y: 0};
     this.name = "nameless";
+    this.skin = "player";
   }
 }
 
@@ -89,6 +90,7 @@ function socketConnection(socket) {
   socket.on("send player", plyr => {
     player.pos = {x: plyr[0], y: plyr[1]};
     player.world = plyr[2];
+    player.skin = plyr[4];
     if (Configuration.namesEnabled) {
       player.name = plyr[3];
     } else {
@@ -107,7 +109,7 @@ function socketConnection(socket) {
 }
 
 function convertPlayer(player) {
-  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), "player.png", player.id];
+  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), player.skin, player.id];
 }
 
 function sendPlayers() {
@@ -125,7 +127,7 @@ server.listen(_port, () => {
 
 setInterval(sendPlayers, 25);
 
-get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
+get({'host': 'api.ipify.org', 'port': _port, 'path': '/'}, function(resp) {
   resp.on('data', function(ip) {
     console.log("Players can join with: " + ip + ":" + _port);
     console.log(`Make sure you are port forwarding on port ${_port}!`);

@@ -60,10 +60,10 @@ if (socket != undefined) {
         OtherPlayers[plyr[5]].x = plyr[0];
         OtherPlayers[plyr[5]].y = plyr[1];
         OtherPlayers[plyr[5]].location = plyr[2];
-        OtherPlayers[plyr[5]].img = cliDir + 'textures/skins/' + plyr[4];
+        OtherPlayers[plyr[5]].img = cliDir + 'textures/skins/' + plyr[4] + ".png";
         OtherPlayers[plyr[5]].updateName(plyr[3]);
       } else {
-        OtherPlayers[plyr[5]] = new OnlinePlayer(cliDir + 'textures/skins/' + plyr[4], plyr[0], plyr[1], plyr[3]);
+        OtherPlayers[plyr[5]] = new OnlinePlayer(cliDir + 'textures/skins/' + plyr[4] + ".png", plyr[0], plyr[1], plyr[3]);
       }
     }
     for (const plyr in OtherPlayers) {
@@ -83,7 +83,7 @@ if (socket != undefined) {
       }
     }
     if (Username !== '' && GAME !== undefined)
-      socket.emit('send player', [Player.x, Player.y, WorldId, Username]);
+      socket.emit('send player', [Player.x, Player.y, WorldId, Username, Player.skin]);
   });
   //setInterval(getServerInfo, 1000); REMOVED FOR NOW
   //getServerInfo(); SINGLEPLAYER LOL!
@@ -138,7 +138,32 @@ function syncProgress() {
   if (swaps != null) {
     swapsComplete = JSON.parse(swaps);
   }
-  updateAllStars()
+
+  syncRewards();
+
+  updateAllStars();
 }
+
+function syncRewards() {
+  for (const i in levelsComplete) {
+    if (!(levelsComplete[i] > 0)) continue;
+    if (!('reward' in lvlData[i])) continue;
+    for (const b in lvlData[i].reward) {
+      if (!(b in LevelRewards)) {
+        LevelRewards[b] = lvlData[i].reward[b];
+      } else {
+        LevelRewards[b] += lvlData[i].reward[b];
+      }
+    }
+  }
+}
+
+function setSkin(skin) {
+  PlayerSkin = cliDir + 'textures/skins/' + skin + ".png";
+  Player.skin = skin;
+  Player.img = PlayerSkin;
+  PlayerSkinName = skin;
+}
+
 levelsComplete = new Array(lvlData.length).fill(false);
 syncProgress()

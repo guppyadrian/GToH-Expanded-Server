@@ -198,6 +198,9 @@ class Block {
         else
           this.img = cliDir + `textures/doors/door${this.tags[0]}.png`;
         break;
+      case 'road':
+        this.img = cliDir + `textures/roads/road${this.tags[0]}.png`;
+        break;
       case 'key':
         if (levelFormat === 1) {
           if (oImg === null)
@@ -211,6 +214,9 @@ class Block {
         this.img = cliDir + `textures/animations/${oImg}`;
         break;
       case 'decor':
+        this.img = cliDir + `textures/${oImg}`;
+        break;
+      case 'code':
         this.img = cliDir + `textures/${oImg}`;
         break;
       case 'small':
@@ -262,7 +268,7 @@ class Block {
   }
 
   updateSprite(redActive) {
-    if (['red', 'blue', 'orange', 'purple', 'door'].indexOf(this.type) === -1) return;
+    if (['red', 'blue', 'orange', 'purple', 'door', 'road'].indexOf(this.type) === -1) return;
     this.opacity = 0.3;
     switch (this.type) {
       case 'red':
@@ -290,6 +296,14 @@ class Block {
             this.opacity = 1;
         }
 
+        break;
+      case 'road':
+        this.opacity = 1
+        if (perLevel.includes(this.tags[0])) {
+          this.img = cliDir + `textures/roads/roadfill${this.tags[0]}.png`;
+        } else {
+          this.img = cliDir + `textures/roads/road${this.tags[0]}.png`;
+        }
         break;
     }
   }

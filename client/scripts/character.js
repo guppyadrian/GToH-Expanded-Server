@@ -25,6 +25,7 @@ class Character {
     this.x = x;
     this.y = y;
     this.img = img;
+    this.skin = PlayerSkinName;
     this.yAccel = 0;
     this.xAccel = 0;
     this.wallJump = 0;
@@ -103,6 +104,15 @@ class Character {
                   return true;
               }
 
+              break;
+            case 'road':
+              if (levelFormat === 1) {
+                if (perLevel.includes(i.tags[0].slice(4)))
+                  return true;
+              } else {
+                if (perLevel.includes(i.tags[0]))
+                  return true;
+              }
               break;
             case 'bounce':
               bounce = 1;
@@ -221,6 +231,20 @@ class Character {
             case 'stars2':
             case 'stars3':
             case 'stars4':
+              break;
+            case 'code':
+              if (i.tags[0] != undefined && i.tags[1] !== false) { // second part is for making it single use
+                try {
+                  eval(i.tags[0]);
+                }
+                catch (error) {
+                  AddChat("An error occurred while executing a code block, check console for details");
+                  console.log(error);
+                }
+                if (i.tags[1] === true) {
+                  i.tags[1] = false;
+                }
+              }
               break;
             case 'decor':
               if(i.tags[1] === false && i.tags.includes('moderatorTest')) {

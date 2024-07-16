@@ -86,6 +86,7 @@ function GameTick() {
             localStorage.setItem("swaps", JSON.stringify(swapsComplete));
           }
           //socket.emit('new pb', WorldId, i, ReplayKeys); REMOVED BECAUSE SOCKET IS BROKEN IN SINGLEPLAYER
+          syncRewards(); //update rewards!
           AddChat(`Time: ${Timer / 40}`);
         } else {
           AddChat('Cheats enabled. Wake up. Wake up. Wake up.');
@@ -443,6 +444,7 @@ function sign_up(){
   socket.emit('check register', signup, false); 
 }
 
+/*
 socket.on('true login', (rer, logging)=>{
   if (logging) {
     if (rer == true) {
@@ -462,6 +464,7 @@ socket.on('true login', (rer, logging)=>{
     alert("new account created");
   }
 });
+*/
 
 /*
 X = 150
