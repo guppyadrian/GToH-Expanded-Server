@@ -23,8 +23,8 @@ console.log("");
 
 /* Arbitrary Values */
 const _port = 80;
-const ServerVersion = 2;
-const MinimumClientVersion = 2;
+const ServerVersion = 3;
+const MinimumClientVersion = 3;
 
 var playerList = {}
 
@@ -92,7 +92,7 @@ function socketConnection(socket) {
     player.pos = {x: plyr[0], y: plyr[1]};
     player.world = plyr[2];
     player.skin = plyr[4];
-    //player.rank = plyr[5];
+    player.rank = plyr[5];
     if (Configuration.namesEnabled) {
       player.name = plyr[3];
     } else {
@@ -111,7 +111,7 @@ function socketConnection(socket) {
 }
 
 function convertPlayer(player) {
-  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), player.skin, player.id];
+  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), player.skin, player.id, player.rank];
 }
 
 function sendPlayers() {
