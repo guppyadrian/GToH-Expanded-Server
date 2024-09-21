@@ -106,7 +106,7 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
-    io.emit("chat", player.name + ": " + msg);
+    io.emit("chat", player.name + ": " + msg, "non");
   });
 }
 
@@ -140,7 +140,7 @@ get({'host': 'api.ipify.org', 'port': _port, 'path': '/'}, function(resp) {
 const replServer = repl.start();
 
 replServer.context.shout = msg => {
-  io.emit("chat", "Shout from server: " + msg);
+  io.emit("chat", "Shout from server: " + msg, "admin");
 }
 
 replServer.context.players = getPlayersAmount;
