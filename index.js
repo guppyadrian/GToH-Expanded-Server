@@ -23,8 +23,8 @@ console.log("");
 
 /* Arbitrary Values */
 const _port = 80;
-const ServerVersion = 2;
-const MinimumClientVersion = 2;
+const ServerVersion = 3;
+const MinimumClientVersion = 3;
 
 var playerList = {}
 
