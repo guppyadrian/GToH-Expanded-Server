@@ -108,12 +108,8 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
-<<<<<<< Updated upstream
-    io.emit("chat", player.name + ": " + msg);
-=======
     chatlog.push([player.name, msg]);
-    io.emit("chat", player.name + ": " + msg.substring(0, 100), "non");
->>>>>>> Stashed changes
+    io.emit("chat", player.name + ": " + msg.substring(0, 100));
   });
 }
 
