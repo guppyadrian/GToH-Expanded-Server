@@ -47,6 +47,7 @@ class OnlinePlayer {
     this.pos = {x: 0, y: 0};
     this.name = "nameless";
     this.skin = "player";
+    this.rank = 0;
   }
 }
 
@@ -91,6 +92,7 @@ function socketConnection(socket) {
     player.pos = {x: plyr[0], y: plyr[1]};
     player.world = plyr[2];
     player.skin = plyr[4];
+    player.rank = plyr[5];
     if (Configuration.namesEnabled) {
       player.name = plyr[3];
     } else {
@@ -109,7 +111,7 @@ function socketConnection(socket) {
 }
 
 function convertPlayer(player) {
-  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), player.skin, player.id];
+  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), player.skin, player.id, player.rank];
 }
 
 function sendPlayers() {
