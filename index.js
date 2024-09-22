@@ -108,8 +108,8 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
-    chatlog.push([player.name, msg]);
-    io.emit("chat", player.name + ": " + msg.substring(0, 100));
+    chatlog.push([player.name.substring(0, 15), msg.substring(0, 100)]);
+    io.emit("chat", player.name.substring(0, 15) + ": " + msg.substring(0, 100));
   });
 }
 
@@ -148,3 +148,4 @@ replServer.context.shout = msg => {
 
 replServer.context.players = getPlayersAmount;
 replServer.context.playerList = getPlayerList;
+replServer.context.chatlog = chatlog;
