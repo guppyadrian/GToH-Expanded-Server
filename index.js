@@ -18,6 +18,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url)) + "\\client";
 
 console.log("Config Options:");
 console.log("Chat enabled: " + Configuration.chatEnabled);
+console.log("Shorten Text: " + Configuration.shortenTextEnabled);
 console.log("Names enabled: " + Configuration.namesEnabled);
 console.log("");
 
@@ -29,6 +30,25 @@ const MinimumClientVersion = 2;
 var playerList = {}
 
 let chatlog = [];
+
+function getChatlog(amount = 200) {
+  for (let i = Math.max(chatlog.length - amount, 0); i < chatlog.length; i++) {
+    if (chatlog[i] === undefined) continue;
+    const date = new Date(chatlog[i][2]);
+
+    function convTwo(num) {
+      return (num.toString().length === 1 ? "0" : "") + num;
+    }
+
+    const dateMonth = convTwo(date.getMonth());
+    const dateDay = convTwo(date.getDate());
+    const dateHours = convTwo(date.getHours());
+    const dateMinutes = convTwo(date.getMinutes());
+    const dateSeconds = convTwo(date.getSeconds());
+    const dateString = dateMonth + "/" + dateDay + ", "+ dateHours + ":" + dateMinutes + ":" + dateSeconds;
+    console.log(dateString + "     " + chatlog[i][0] + ": " + chatlog[i][1]);
+  }
+}
 
 function getPlayerList() {
   const names = [];
@@ -108,13 +128,16 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
-    chatlog.push([player.name.substring(0, 15), msg.substring(0, 100)]);
-    io.emit("chat", player.name.substring(0, 15) + ": " + msg.substring(0, 100));
+    const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
+    const finMsg = Configuration.shortenTextEnabled ? msg.substring(0, 100) : msg;
+    chatlog.push([plyrName, finMsg, Date.now()]);
+    io.emit("chat", plyrName + ": " + finMsg);
   });
 }
 
 function convertPlayer(player) {
-  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), player.skin, player.id];
+  const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
+  return [player.pos.x, player.pos.y, player.world, plyrName, player.skin, player.id];
 }
 
 function sendPlayers() {
@@ -146,6 +169,7 @@ replServer.context.shout = msg => {
   io.emit("chat", "Shout from server: " + msg);
 }
 
+replServer.context.getChatlog = getChatlog;
 replServer.context.players = getPlayersAmount;
 replServer.context.playerList = getPlayerList;
 replServer.context.chatlog = chatlog;
