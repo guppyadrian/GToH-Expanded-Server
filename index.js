@@ -114,7 +114,7 @@ function socketConnection(socket) {
 
   socket.on("code", msg => {
     if (msg in Codes) {
-      socket.emit("codeReturn", Codes[msg]);
+      socket.emit("codeReturn", {reward: Codes[msg], code: msg});
     } else {
       socket.emit("codeReturn", false);
     }
