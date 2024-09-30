@@ -9,6 +9,7 @@ import { Server } from 'socket.io';
 import { get } from 'node:http';
 import * as Configuration from './config.js';
 import * as repl from 'node:repl';
+import { Codes } from './promoCodes.js';
 
 const app = express();
 const server = createServer(app);
@@ -22,7 +23,7 @@ console.log("Names enabled: " + Configuration.namesEnabled);
 console.log("");
 
 /* Arbitrary Values */
-const _port = 80;
+const _port = 9998;
 const ServerVersion = 3;
 const MinimumClientVersion = 3;
 
@@ -110,6 +111,14 @@ function socketConnection(socket) {
     }
     io.emit("chat", player.name + ": " + msg, "non");
   });
+
+  socket.on("code", msg => {
+    if (msg in Codes) {
+      socket.emit("codeReturn", Codes[msg]);
+    } else {
+      socket.emit("codeReturn", false);
+    }
+  });
 }
 
 function convertPlayer(player) {
@@ -131,13 +140,22 @@ server.listen(_port, () => {
 
 setInterval(sendPlayers, 25);
 
+
+
+
+
+
 get({'host': 'api.ipify.org', 'port': _port, 'path': '/'}, function(resp) {
+  
   resp.on('data', function(ip) {
     console.log("Players can join with: " + ip + ":" + _port);
     console.log(`Make sure you are port forwarding on port ${_port}!`);
     console.log("");
   });
+}).on("error", (err) => {
+  console.log("failed to get IP");
 });
+
 
 const replServer = repl.start();
 
