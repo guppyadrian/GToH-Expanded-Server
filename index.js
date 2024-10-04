@@ -116,6 +116,8 @@ function socketConnection(socket) {
     player.skin = plyr[4];
     //player.rank = plyr[5];
     if (Configuration.namesEnabled) {
+      if (player.name !== plyr[3] && player.name === "nameless")
+        io.emit("chat", plyr[3] + " Has Joined.");
       player.name = plyr[3];
     } else {
       player.name = player.id.substring(0, 4);
