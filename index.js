@@ -19,6 +19,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url)) + "\\client";
 
 console.log("Config Options:");
 console.log("Chat enabled: " + Configuration.chatEnabled);
+console.log("Shorten Text: " + Configuration.shortenTextEnabled);
 console.log("Names enabled: " + Configuration.namesEnabled);
 console.log("");
 
@@ -28,6 +29,27 @@ const ServerVersion = 3;
 const MinimumClientVersion = 3;
 
 var playerList = {}
+
+let chatlog = [];
+
+function getChatlog(amount = 200) {
+  for (let i = Math.max(chatlog.length - amount, 0); i < chatlog.length; i++) {
+    if (chatlog[i] === undefined) continue;
+    const date = new Date(chatlog[i][2]);
+
+    function convTwo(num) {
+      return (num.toString().length === 1 ? "0" : "") + num;
+    }
+
+    const dateMonth = convTwo(date.getMonth());
+    const dateDay = convTwo(date.getDate());
+    const dateHours = convTwo(date.getHours());
+    const dateMinutes = convTwo(date.getMinutes());
+    const dateSeconds = convTwo(date.getSeconds());
+    const dateString = dateMonth + "/" + dateDay + ", "+ dateHours + ":" + dateMinutes + ":" + dateSeconds;
+    console.log(dateString + "     " + chatlog[i][0] + ": " + chatlog[i][1]);
+  }
+}
 
 function getPlayerList() {
   const names = [];
@@ -97,6 +119,8 @@ function socketConnection(socket) {
     player.rank = plyr[5];
     player.hat = plyr[6];
     if (Configuration.namesEnabled) {
+      if (player.name !== plyr[3] && player.name === "nameless")
+        io.emit("chat", plyr[3] + " Has Joined.");
       player.name = plyr[3];
     } else {
       player.name = player.id.substring(0, 4);
@@ -109,20 +133,24 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
-    io.emit("chat", player.name + ": " + msg, "non");
-  });
 
+    const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
+    const finMsg = Configuration.shortenTextEnabled ? msg.substring(0, 100) : msg;
+    chatlog.push([plyrName, finMsg, Date.now()]);
+    io.emit("chat", plyrName + ": " + finMsg);
+  });
+  
   socket.on("code", msg => {
     if (msg in Codes) {
       socket.emit("codeReturn", {reward: Codes[msg], code: msg});
     } else {
       socket.emit("codeReturn", false);
     }
-  });
 }
 
 function convertPlayer(player) {
-  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), player.skin, player.id, player.rank, player.hat];
+  const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
+  return [player.pos.x, player.pos.y, player.world, plyrName, player.skin, player.id, player.rank, player.hat];
 }
 
 function sendPlayers() {
@@ -163,5 +191,7 @@ replServer.context.shout = msg => {
   io.emit("chat", "Shout from server: " + msg, "admin");
 }
 
+replServer.context.getChatlog = getChatlog;
 replServer.context.players = getPlayersAmount;
 replServer.context.playerList = getPlayerList;
+replServer.context.chatlog = chatlog;
