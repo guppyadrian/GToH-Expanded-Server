@@ -24,7 +24,7 @@ console.log("Names enabled: " + Configuration.namesEnabled);
 console.log("");
 
 /* Arbitrary Values */
-const _port = 9998;
+const _port = 9999;
 const ServerVersion = 3;
 const MinimumClientVersion = 3;
 
@@ -146,6 +146,7 @@ function socketConnection(socket) {
     } else {
       socket.emit("codeReturn", false);
     }
+  });
 }
 
 function convertPlayer(player) {
@@ -174,7 +175,6 @@ setInterval(sendPlayers, 25);
 
 
 get({'host': 'api.ipify.org', 'port': _port, 'path': '/'}, function(resp) {
-  
   resp.on('data', function(ip) {
     console.log("Players can join with: " + ip + ":" + _port);
     console.log(`Make sure you are port forwarding on port ${_port}!`);
