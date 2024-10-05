@@ -18,15 +18,37 @@ const __dirname = dirname(fileURLToPath(import.meta.url)) + "\\client";
 
 console.log("Config Options:");
 console.log("Chat enabled: " + Configuration.chatEnabled);
+console.log("Shorten Text: " + Configuration.shortenTextEnabled);
 console.log("Names enabled: " + Configuration.namesEnabled);
 console.log("");
 
 /* Arbitrary Values */
 const _port = 80;
-const ServerVersion = 1;
-const MinimumClientVersion = 1;
+const ServerVersion = 2;
+const MinimumClientVersion = 2;
 
 var playerList = {}
+
+let chatlog = [];
+
+function getChatlog(amount = 200) {
+  for (let i = Math.max(chatlog.length - amount, 0); i < chatlog.length; i++) {
+    if (chatlog[i] === undefined) continue;
+    const date = new Date(chatlog[i][2]);
+
+    function convTwo(num) {
+      return (num.toString().length === 1 ? "0" : "") + num;
+    }
+
+    const dateMonth = convTwo(date.getMonth());
+    const dateDay = convTwo(date.getDate());
+    const dateHours = convTwo(date.getHours());
+    const dateMinutes = convTwo(date.getMinutes());
+    const dateSeconds = convTwo(date.getSeconds());
+    const dateString = dateMonth + "/" + dateDay + ", "+ dateHours + ":" + dateMinutes + ":" + dateSeconds;
+    console.log(dateString + "     " + chatlog[i][0] + ": " + chatlog[i][1]);
+  }
+}
 
 function getPlayerList() {
   const names = [];
@@ -46,6 +68,8 @@ class OnlinePlayer {
     this.world = -6969;
     this.pos = {x: 0, y: 0};
     this.name = "nameless";
+    this.skin = "player";
+    this.rank = 0;
   }
 }
 
@@ -89,7 +113,11 @@ function socketConnection(socket) {
   socket.on("send player", plyr => {
     player.pos = {x: plyr[0], y: plyr[1]};
     player.world = plyr[2];
+    player.skin = plyr[4];
+    //player.rank = plyr[5];
     if (Configuration.namesEnabled) {
+      if (player.name !== plyr[3] && player.name === "nameless")
+        io.emit("chat", plyr[3] + " Has Joined.");
       player.name = plyr[3];
     } else {
       player.name = player.id.substring(0, 4);
@@ -102,12 +130,16 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
-    io.emit("chat", player.name + ": " + msg);
+    const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
+    const finMsg = Configuration.shortenTextEnabled ? msg.substring(0, 100) : msg;
+    chatlog.push([plyrName, finMsg, Date.now()]);
+    io.emit("chat", plyrName + ": " + finMsg);
   });
 }
 
 function convertPlayer(player) {
-  return [player.pos.x, player.pos.y, player.world, player.name.substring(0, 15), "player.png", player.id];
+  const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
+  return [player.pos.x, player.pos.y, player.world, plyrName, player.skin, player.id];
 }
 
 function sendPlayers() {
@@ -125,7 +157,7 @@ server.listen(_port, () => {
 
 setInterval(sendPlayers, 25);
 
-get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
+get({'host': 'api.ipify.org', 'port': _port, 'path': '/'}, function(resp) {
   resp.on('data', function(ip) {
     console.log("Players can join with: " + ip + ":" + _port);
     console.log(`Make sure you are port forwarding on port ${_port}!`);
@@ -139,5 +171,7 @@ replServer.context.shout = msg => {
   io.emit("chat", "Shout from server: " + msg);
 }
 
+replServer.context.getChatlog = getChatlog;
 replServer.context.players = getPlayersAmount;
 replServer.context.playerList = getPlayerList;
+replServer.context.chatlog = chatlog;
