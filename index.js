@@ -9,6 +9,7 @@ import { Server } from 'socket.io';
 import { get } from 'node:http';
 import * as Configuration from './config.js';
 import * as repl from 'node:repl';
+import { Codes } from './promoCodes.js';
 
 const app = express();
 const server = createServer(app);
@@ -23,9 +24,9 @@ console.log("Names enabled: " + Configuration.namesEnabled);
 console.log("");
 
 /* Arbitrary Values */
-const _port = 80;
-const ServerVersion = 2;
-const MinimumClientVersion = 2;
+const _port = 9998;
+const ServerVersion = 3;
+const MinimumClientVersion = 3;
 
 var playerList = {}
 
@@ -70,6 +71,7 @@ class OnlinePlayer {
     this.name = "nameless";
     this.skin = "player";
     this.rank = 0;
+    this.hat = false;
   }
 }
 
@@ -114,7 +116,8 @@ function socketConnection(socket) {
     player.pos = {x: plyr[0], y: plyr[1]};
     player.world = plyr[2];
     player.skin = plyr[4];
-    //player.rank = plyr[5];
+    player.rank = plyr[5];
+    player.hat = plyr[6];
     if (Configuration.namesEnabled) {
       if (player.name !== plyr[3] && player.name === "nameless")
         io.emit("chat", plyr[3] + " Has Joined.");
@@ -130,16 +133,24 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
+
     const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
     const finMsg = Configuration.shortenTextEnabled ? msg.substring(0, 100) : msg;
     chatlog.push([plyrName, finMsg, Date.now()]);
     io.emit("chat", plyrName + ": " + finMsg);
   });
+  
+  socket.on("code", msg => {
+    if (msg in Codes) {
+      socket.emit("codeReturn", {reward: Codes[msg], code: msg});
+    } else {
+      socket.emit("codeReturn", false);
+    }
 }
 
 function convertPlayer(player) {
   const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
-  return [player.pos.x, player.pos.y, player.world, plyrName, player.skin, player.id];
+  return [player.pos.x, player.pos.y, player.world, plyrName, player.skin, player.id, player.rank, player.hat];
 }
 
 function sendPlayers() {
@@ -157,18 +168,27 @@ server.listen(_port, () => {
 
 setInterval(sendPlayers, 25);
 
+
+
+
+
+
 get({'host': 'api.ipify.org', 'port': _port, 'path': '/'}, function(resp) {
+  
   resp.on('data', function(ip) {
     console.log("Players can join with: " + ip + ":" + _port);
     console.log(`Make sure you are port forwarding on port ${_port}!`);
     console.log("");
   });
+}).on("error", (err) => {
+  console.log("failed to get IP");
 });
+
 
 const replServer = repl.start();
 
 replServer.context.shout = msg => {
-  io.emit("chat", "Shout from server: " + msg);
+  io.emit("chat", "Shout from server: " + msg, "admin");
 }
 
 replServer.context.getChatlog = getChatlog;
