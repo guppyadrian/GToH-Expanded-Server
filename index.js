@@ -72,6 +72,7 @@ class OnlinePlayer {
     this.skin = "player";
     this.rank = 0;
     this.hat = false;
+    this.lastMessage = Date.now();
   }
 }
 
@@ -133,6 +134,12 @@ function socketConnection(socket) {
       socket.emit("chat", "chat is disabled for this server.");
       return;
     }
+
+    if (Configuration.slowModeEnabled && Date.now() - player.lastMessage < 5000) {
+      socket.emit("chat", "SLOWMODE: Please wait 5 seconds between messages.");
+      return;
+    }
+    player.lastMessage = Date.now();
 
     const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
     const finMsg = Configuration.shortenTextEnabled ? msg.substring(0, 100) : msg;
