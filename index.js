@@ -24,7 +24,7 @@ console.log("Names enabled: " + Configuration.namesEnabled);
 console.log("");
 
 /* Arbitrary Values */
-const _port = 9999;
+const _port = 80;
 const ServerVersion = 3;
 const MinimumClientVersion = 3;
 

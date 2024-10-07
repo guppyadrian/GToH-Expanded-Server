@@ -14,7 +14,7 @@ Guide to setup server:
 	- You may have to restart your pc after installing
 	- You can test if it is installed by opening command prompt and typing "node", it should say "Welcome to Node.js"
 
-3. Setup configuration
+4. Setup configuration
 	- Open config.js and change the values to true or false
 
 5. Open STARTSERVER.bat
