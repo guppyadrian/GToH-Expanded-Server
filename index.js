@@ -10,6 +10,7 @@ import { get } from 'node:http';
 import * as Configuration from './config.js';
 import * as repl from 'node:repl';
 import { Codes } from './promoCodes.js';
+import { Filter } from 'bad-words';
 
 const app = express();
 const server = createServer(app);
@@ -31,6 +32,8 @@ const MinimumClientVersion = 3;
 var playerList = {}
 
 let chatlog = [];
+
+const chatFilter = new Filter();
 
 function getChatlog(amount = 200) {
   for (let i = Math.max(chatlog.length - amount, 0); i < chatlog.length; i++) {
@@ -120,6 +123,7 @@ function socketConnection(socket) {
     player.rank = plyr[5];
     player.hat = plyr[6];
     if (Configuration.namesEnabled) {
+      if (plyr[3].substring(0, 7) === "[ADMIN]") return false;
       if (player.name !== plyr[3] && player.name === "nameless")
         io.emit("chat", plyr[3] + " Has Joined.");
       player.name = plyr[3];
@@ -140,11 +144,10 @@ function socketConnection(socket) {
       return;
     }
     player.lastMessage = Date.now();
-
-    const plyrName = Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name;
-    const finMsg = Configuration.shortenTextEnabled ? msg.substring(0, 100) : msg;
+    const plyrName = (player.skin === "dev" ? "[ADMIN]" : "") + (Configuration.shortenTextEnabled ? player.name.substring(0, 15) : player.name);
+    const finMsg = chatFilter.clean(Configuration.shortenTextEnabled ? msg.substring(0, 100) : msg);
     chatlog.push([plyrName, finMsg, Date.now()]);
-    io.emit("chat", plyrName + ": " + finMsg);
+    io.emit("chat", plyrName + "> " + finMsg);
   });
   
   socket.on("code", msg => {
